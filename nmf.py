@@ -69,7 +69,7 @@ def nlssubprob(V,W,H,tol,maxiter):
 
      return (H, grad, iter)
 
-f = open('/Users/julia/Downloads/ml-1m/ratings.dat').read().split('\n')
+f = open('ratings.dat').read().split('\n')
 
 marks = []
 for rate in f:
@@ -89,4 +89,4 @@ Num_of_factors = 100
 Hinit = np.random.random((Num_of_factors, 3952))
 Winit = np.random.random((6040, Num_of_factors))
 
-W,H = nmf(V,Winit,Hinit,0.00001,1000)
+W,H = nmf(V,Winit,Hinit,0.000001,1000)
