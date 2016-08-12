@@ -26,7 +26,8 @@ def nmf(V,W,H,tol,maxiter):
           (H,gradH,iterH) = nlssubprob(V,W,H,tolH,1000)
           if iterH==1: tolH = 0.1 * tolH
 
-     print 'projnorm', projnorm
+     print  'project gradient', norm(V - np.dot(W,H))
+
 
      return (W,H)
 
@@ -40,7 +41,7 @@ def nlssubprob(V,W,H,tol,maxiter):
      for iter in xrange(1, maxiter):
           grad = np.dot(WtW, H) - WtV
           projgrad = norm(grad[np.logical_or(grad < 0, H >0)])
-          if projgrad < tol: break
+         # if projgrad < tol: break
 
           # search step size
           for inner_iter in xrange(1,20):
@@ -69,6 +70,35 @@ def nlssubprob(V,W,H,tol,maxiter):
 
      return (H, grad, iter)
 
+
+def nmf_just_grad(V,W,H,tol,maxiter):
+
+     for iter in xrange(1, maxiter):
+
+          WtV = np.dot(W.T, V)
+          WtWH = np.dot(np.dot(W.T, W), H)
+
+          VHt = np.dot(V, H.T)
+          WHHt = np.dot(np.dot(W, H), H.T)
+
+          for i in range(H.shape[0]):
+              for j in range(H.shape[1]):
+                   if WtWH[i][j]:
+                         H[i][j] = H[i][j] * WtV[i][j] / WtWH[i][j]
+
+          for i in range(W.shape[0]):
+               for j in range(W.shape[1]):
+                    if WHHt[i][j]:
+                         W[i][j] = W[i][j] * VHt[i][j] / WHHt[i][j]
+
+     print 'gradient descent', norm(V - np.dot(W,H))
+
+     return (W, H)
+
+
+
+
+
 f = open('ratings.dat').read().split('\n')
 
 marks = []
@@ -88,5 +118,6 @@ for mark in marks:
 Num_of_factors = 100
 Hinit = np.random.random((Num_of_factors, 3952))
 Winit = np.random.random((6040, Num_of_factors))
-
-W,H = nmf(V,Winit,Hinit,0.000001,1000)
+print 'initial norm', norm(V - np.dot(Winit, Hinit))
+W,H = nmf_just_grad(V,Winit,Hinit,0.000001,150)
+W,H = nmf(V,Winit,Hinit,0.000001,150)
